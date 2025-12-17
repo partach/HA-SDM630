@@ -48,11 +48,11 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         hass,
         hub.client,
         config[CONF_SLAVE_ID],
-        selected_registers,  # Pass the selected register map
+        selected_registers
     )
-    entry.async_on_unload(entry.add_update_listener(update_listener))
     # Store config for unload cleanup
     coordinator.config = config
+    entry.async_on_unload(entry.add_update_listener(update_listener))
 
     # Test connection
     if not await coordinator.async_test_connection():
