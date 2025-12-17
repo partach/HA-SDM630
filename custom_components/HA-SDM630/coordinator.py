@@ -30,7 +30,7 @@ class HA_SDM630Coordinator(DataUpdateCoordinator):
 
     def _group_addresses(self) -> Dict[int, list]:
         """Group consecutive register addresses to minimize requests."""
-        addresses = sorted([(info["address"], key) for key, info in REGISTER_MAP.items()])
+        addresses = sorted([(info["address"], key) for key, info in reg_map.items()])
         groups = {}
         current_start = None
         current_keys = []
