@@ -67,7 +67,7 @@ class SDM630Coordinator(DataUpdateCoordinator):
         try:
             if await self._async_connect():
                 # Try reading one known register
-                result = await self.client.read_input_registers(0, 2, slave=self.slave_id)
+                result = await self.client.read_input_registers(address=0, count=2, slave=self.slave_id)
                 return not result.isError()
         except Exception as err:
             _LOGGER.debug("Connection test failed: %s", err)
