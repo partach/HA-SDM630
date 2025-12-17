@@ -41,7 +41,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         hub.client,  # ← Pass shared client
         config[CONF_SLAVE_ID],
     )
-
+    coordinator.config = config  # Save for later unload
     # Test connection
     if not await coordinator.async_test_connection():
         raise ConfigEntryNotReady("Could not connect to SDM630")
@@ -51,7 +51,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     hass.data[DOMAIN][entry.entry_id] = coordinator
 
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
-    coordinator.config = config  # Save for later unload
+
     
     return True
 
@@ -67,7 +67,12 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         baudrate = config[CONF_BAUDRATE]
         hub_key = f"{port}_{baudrate}"
 
-        remaining = [e for e in hass.config_entries.async_entries(DOMAIN) if e.data[CONF_SERIAL_PORT] == port and e.data[CONF_BAUDRATE] == baudrate]
+        remaining = [
+            e for e in hass.config_entries.async_entries(DOMAIN)
+            if e.entry_id != entry.entry_id  # Exclude current one
+            and e.data[CONF_SERIAL_PORT] == port
+            and e.data[CONF_BAUDRATE] == baudrate
+        ]
         if not remaining:
             hub = hass.data[DOMAIN]["hubs"].pop(hub_key, None)
             if hub:
