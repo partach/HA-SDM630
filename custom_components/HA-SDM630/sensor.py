@@ -1,7 +1,7 @@
 from homeassistant.components.sensor import SensorEntity, SensorStateClass, SensorDeviceClass
 from homeassistant.core import HomeAssistant
 from homeassistant.config_entries import ConfigEntry
-
+from homeassistant.helpers.entity import CoordinatorEntity
 from .const import DOMAIN, VALIDATED_REGISTER_MAP as REGISTER_MAP
 from .coordinator import SDM630Coordinator
 
@@ -22,9 +22,12 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_e
     async_add_entities(entities)
 
 
-class SDM630Sensor(SensorEntity):
+class SDM630Sensor(CoordinatorEntity, SensorEntity):  # ← Inherit from CoordinatorEntity
+    """Representation of an SDM630 sensor."""
+
     def __init__(self, coordinator: SDM630Coordinator, entry: ConfigEntry, key: str, info: dict):
-        self._coordinator = coordinator
+        """Initialize the sensor."""
+        super().__init__(coordinator)  # This handles update listening
         self._key = key
         self._attr_unique_id = f"{entry.entry_id}_{key}"
         self._attr_name = f"{entry.title} {info['name']}"
@@ -34,7 +37,10 @@ class SDM630Sensor(SensorEntity):
 
     @property
     def native_value(self):
-        return self._coordinator.data.get(self._key)
+        """Return the state of the sensor."""
+        return self.coordinator.data.get(self._key)
 
-    async def async_added_to_hass(self):
-        self._coordinator.async_add_listener(self.async_write_ha_state)
+    @property
+    def available(self) -> bool:
+        """Return if entity is available."""
+        return super().available and self.coordinator.data.get(self._key) is not Noneasync_write_ha_state)
