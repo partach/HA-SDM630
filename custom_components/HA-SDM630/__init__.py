@@ -16,6 +16,7 @@ from .const import (
     CONF_REGISTER_SET,
     DEFAULT_REGISTER_SET,
     REGISTER_SETS,
+    REGISTER_SET_BASIC,
 )
 from .coordinator import HA_SDM630Coordinator
 
