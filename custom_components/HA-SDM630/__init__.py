@@ -1,7 +1,6 @@
 """The SDM630 integration."""
 
 import logging
-from datetime import timedelta
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import Platform
