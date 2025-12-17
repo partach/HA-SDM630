@@ -8,7 +8,14 @@ from homeassistant.const import Platform
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryNotReady
 
-from .const import DOMAIN
+from .const import (
+    DOMAIN,
+    CONF_SERIAL_PORT,
+    CONF_SLAVE_ID,
+    CONF_BAUDRATE,
+    CONF_UPDATE_INTERVAL,
+    DEFAULT_UPDATE_INTERVAL,
+)
 from .coordinator import SDM630Coordinator
 
 _LOGGER = logging.getLogger(__name__)
