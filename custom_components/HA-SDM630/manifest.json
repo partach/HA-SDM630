@@ -1,11 +1,13 @@
 {
   "domain": "HA-SDM630",
-  "name": "Eastron SDM630",
-  "version": "0.1.0",
-  "documentation": "https://github.com/partach/HA-SDM630",
-  "requirements": ["pymodbus>=3.7.4"],
-  "dependencies": [],
+  "name": "HA-SDM630",
   "codeowners": ["@partach"],
   "config_flow": true,
-  "iot_class": "local_polling"
+  "dependencies": [],
+  "documentation": "https://github.com/partach/HA-SDM630",
+  "integration_type": "hub",
+  "iot_class": "local_polling",
+  "issue_tracker": "https://github.com/partach/switch_port_card_pro/issues",
+  "requirements": ["pymodbus>=3.7.4"],
+  "version": "0.1.0"
 }
