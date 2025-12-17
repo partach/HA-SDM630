@@ -6,7 +6,7 @@ from datetime import timedelta
 from typing import Dict
 
 from homeassistant.exceptions import UpdateFailed
-from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
+from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 from pymodbus.client import AsyncModbusSerialClient
 from pymodbus.exceptions import ModbusException, ConnectionException
 
