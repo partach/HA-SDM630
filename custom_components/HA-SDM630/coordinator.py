@@ -6,7 +6,7 @@ from datetime import timedelta
 from typing import Dict
 
 from homeassistant.exceptions import UpdateFailed
-from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
+from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 from pymodbus.client import AsyncModbusSerialClient
 from pymodbus.exceptions import ModbusException, ConnectionException
 
@@ -15,7 +15,7 @@ from .const import VALIDATED_REGISTER_MAP as REGISTER_MAP
 _LOGGER = logging.getLogger(__name__)
 
 
-class SDM630Coordinator(DataUpdateCoordinator):
+class HA_SDM630Coordinator(DataUpdateCoordinator):
     def __init__(self, hass, client: AsyncModbusSerialClient, slave_id: int):
         super().__init__(
             hass,
