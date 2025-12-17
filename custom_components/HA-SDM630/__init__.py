@@ -13,6 +13,8 @@ from .const import (
     CONF_SERIAL_PORT,
     CONF_SLAVE_ID,
     CONF_BAUDRATE,
+    CONF_REGISTER_SET,
+    DEFAULT_REGISTER_SET,
 #    CONF_UPDATE_INTERVAL,
 #    DEFAULT_UPDATE_INTERVAL,
 )
@@ -36,6 +38,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         hubs[hub_key] = SDM630Hub(hass, port, baudrate)
 
     hub = hubs[hub_key]
+    register_set = entry.options.get(CONF_REGISTER_SET, DEFAULT_REGISTER_SET)
 
     coordinator = HA_SDM630Coordinator(
         hass,
@@ -43,6 +46,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         config[CONF_SLAVE_ID],
     )
     coordinator.config = config  # Save for later unload
+    coordinator.register_map = REGISTER_SETS[register_set]
     # Test connection
     if not await coordinator.async_test_connection():
         raise ConfigEntryNotReady("Could not connect to SDM630")
@@ -56,6 +60,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     
     return True
 
+async def async_get_options_flow(config_entry):
+    return OptionsFlowHandler(config_entry)
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     unload_ok = await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
