@@ -55,3 +55,23 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         coordinator = hass.data[DOMAIN].pop(entry.entry_id)
         await coordinator.client.close()  # ← Properly close serial connection
     return unload_ok
+
+class SDM630Hub:
+    """Manages a single serial connection shared across meters."""
+
+    def __init__(self, hass, port: str, baudrate: int):
+        self.hass = hass
+        self.port = port
+        self.baudrate = baudrate
+        self.client = AsyncModbusSerialClient(
+            port=port,
+            baudrate=baudrate,
+            parity="N",
+            stopbits=1,
+            bytesize=8,
+            timeout=5,
+        )
+
+    async def close(self):
+        if self.client.connected:
+            await self.client.close()
