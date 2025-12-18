@@ -23,6 +23,7 @@ class HA_SDM630Coordinator(DataUpdateCoordinator):
         self.client = client  # ← Shared client
         self.slave_id = slave_id
         self.register_map = register_map
+        self.client.unit = slave_id
         self._address_groups = self._group_addresses(register_map)  # Use passed map
 
     def _group_addresses(self, reg_map: dict) -> Dict[int, list]:
@@ -96,7 +97,6 @@ class HA_SDM630Coordinator(DataUpdateCoordinator):
         try:
             for start_addr, keys in self._address_groups.items():
                 count = len(keys) * 2  # 2 registers per float
-                self.client.unit = data[CONF_SLAVE_ID]
                 result = await self.client.read_input_registers(address=start_addr,count=count)
 
                 if result.isError():
