@@ -13,6 +13,7 @@ from homeassistant.const import CONF_NAME
 from homeassistant.data_entry_flow import FlowResult
 from homeassistant.helpers import selector
 from homeassistant.core import callback
+from homeassistant.config_entries import CannotConnect
 
 from .const import (
     CONF_BAUDRATE,
@@ -208,7 +209,7 @@ class HA_SDM630ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                 raise CannotConnect("Failed to connect to serial port")
     
             # Optional: test read from a known register (e.g. unit ID or voltage)
-            client.unit = data[CONF_SLAVE_ID]
+            client.unit = user_input[CONF_SLAVE_ID]
             reader = await client.read_input_registers(0, 1)
             if reader.isError():
                 raise CannotConnect("Modbus read failed")
