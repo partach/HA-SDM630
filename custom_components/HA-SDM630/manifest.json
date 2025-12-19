@@ -1,5 +1,5 @@
 {
-  "domain": "HA-SDM630",
+  "domain": "ha_sdm630",
   "name": "HA-SDM630",
   "codeowners": ["@partach"],
   "config_flow": true,
