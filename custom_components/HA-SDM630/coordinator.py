@@ -70,7 +70,7 @@ class HA_SDM630Coordinator(DataUpdateCoordinator):
         try:
             for start_addr, keys in self._address_groups.items():
                 count = len(keys) * 2  # 2 registers per float
-                result = await self.client.read_input_registers(address=start_addr,count=count,slave=self.slave_id)
+                result = await self.client.read_input_registers(address=start_addr,count=count,device_id=self.slave_id)
 
                 if result.isError():
                     raise ModbusException(f"Read error at {start_addr}: {result}")
