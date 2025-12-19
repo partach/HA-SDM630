@@ -7,8 +7,8 @@ import serial.tools.list_ports
 import voluptuous as vol
 from pymodbus.client import AsyncModbusSerialClient, AsyncModbusTcpClient
 from pymodbus.exceptions import ModbusException, ConnectionException
-from .options_flow import OptionsFlowHandler
 from homeassistant import config_entries
+from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_NAME
 from homeassistant.data_entry_flow import FlowResult
 from homeassistant.helpers import selector
@@ -32,6 +32,8 @@ from .const import (
     DEFAULT_SLAVE_ID,
     DEFAULT_STOPBITS,
     DEFAULT_TCP_PORT,
+    CONF_REGISTER_SET,
+    DEFAULT_REGISTER_SET,
     DOMAIN,
 )
 
@@ -49,7 +51,7 @@ class HA_SDM630ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
     @staticmethod
     @callback
-    def async_get_options_flow(config_entry):
+    def async_get_options_flow(config_entry: ConfigEntry):
         """Get the options flow for this handler."""
         return OptionsFlowHandler(config_entry)
         
@@ -263,3 +265,41 @@ class HA_SDM630ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     await client.close()
                 except Exception as err:
                     _LOGGER.debug("Error closing Modbus TCP client: %s", err)
+                    
+class OptionsFlowHandler(config_entries.OptionsFlow):
+    def __init__(self, config_entry):
+        self.config_entry = config_entry
+
+    async def async_step_init(self, user_input=None):
+        if user_input is not None:
+            return self.async_create_entry(data=user_input)
+
+        return self.async_show_form(
+            step_id="init",
+            data_schema=vol.Schema({
+                vol.Required(
+                    CONF_REGISTER_SET,
+                    default=self.config_entry.options.get(
+                        CONF_REGISTER_SET, DEFAULT_REGISTER_SET
+                    )
+                ): selector.SelectSelector(
+                    selector.SelectSelectorConfig(
+                        options=[
+                            selector.SelectOptionDict(
+                                value=REGISTER_SET_BASIC,
+                                label="Basic (Essential sensors, fastest, low overhead)"
+                            ),
+                            selector.SelectOptionDict(
+                                value=REGISTER_SET_BASIC_PLUS,
+                                label="Basic+ (adds VA, PF, neutral, if you need it)"
+                            ),
+                            selector.SelectOptionDict(
+                                value=REGISTER_SET_FULL,
+                                label="Full (All registers, slowest, heavy)"
+                            ),
+                        ],
+                        mode=selector.SelectSelectorMode.DROPDOWN,
+                    )
+                ),
+            }),
+        )
