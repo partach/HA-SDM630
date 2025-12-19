@@ -218,7 +218,7 @@ class HA_SDM630ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
             reader = await client.read_input_registers(address=0, count=2, slave=data[CONF_SLAVE_ID])
             if reader.isError():
                 raise ModbusException(f"Modbus read error: {reader}")
-            if len(result.registers) != 2:
+            if len(reader.registers) != 2:
                 raise ValueError("Invalid response: expected 2 registers")    
         except Exception as err:
             _LOGGER.debug("Error closing Modbus Serial client: %s", err)
