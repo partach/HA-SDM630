@@ -155,12 +155,15 @@ class SDM630SerialHub:
         )
 
     async def close(self):
-        """Close the serial connection."""
-        if self.client.connected:
-            try: 
-               await self.client.close()
-            except Exception as err:
-                _LOGGER.exception("Unexpected error during SDM630 serial close: %s", err)
+        """Close the connection safely."""
+        if self.client is not None:
+            if self.client.connected:
+                try:
+                    await self.client.close()
+                except Exception as err:
+                    _LOGGER.exception("Unexpected error closing SDM630 connection for serial: %s", err)
+    else:
+        _LOGGER.debug("SDM630 hub client was None – nothing to close")
 
 class SDM630TcpHub:
     """Manages a single TCP connection shared across meters."""
@@ -176,9 +179,10 @@ class SDM630TcpHub:
         )
 
     async def close(self):
-        """Close the TCP connection."""
-        if self.client.connected:
-            try: 
-               await self.client.close()
-            except Exception as err:
-                _LOGGER.exception("Unexpected error during SDM630 tcp close: %s", err)
+        """Close the connection safely."""
+        if self.client is not None:
+            if self.client.connected:
+                try:
+                    await self.client.close()
+                except Exception as err:
+                    _LOGGER.exception("Unexpected error closing SDM630 connection for tcp: %s", err)
