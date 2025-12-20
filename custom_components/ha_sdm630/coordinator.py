@@ -70,32 +70,44 @@ class HA_SDM630Coordinator(DataUpdateCoordinator):
         try:
             for start_addr, keys in self._address_groups.items():
                 count = len(keys) * 2  # 2 registers per float
-                result = await self.client.read_input_registers(address=start_addr,count=count,device_id=self.slave_id)
-
+                result = await self.client.read_input_registers(
+                    address=start_addr,
+                    count=count,
+                    device_id=self.slave_id,
+                )
+        
                 if result.isError():
                     raise ModbusException(f"Read error at {start_addr}: {result}")
-
+        
                 registers = result.registers
-
+        
                 for i, key in enumerate(keys):
-                    
                     reg_offset = i * 2
                     reg1 = registers[reg_offset]
                     reg2 = registers[reg_offset + 1]
-
-                    # Convert to big-endian float
-                    raw = struct.pack(">HH", reg1, reg2)
+        
+                    # ---- SDM630 mixed word-order handling ----
+                    order = self.register_map[key].get("word_order", "AB")
+        
+                    if order == "AB":
+                        raw = struct.pack(">HH", reg1, reg2)
+                    elif order == "BA":
+                        raw = struct.pack(">HH", reg2, reg1)
+                    else:
+                        raise ValueError(f"Unknown word_order '{order}' for {key}")
+        
                     value = struct.unpack(">f", raw)[0]
-
-                    # Handle NaN/invalid values
-                    if value is None or (value != value):  # NaN check
+                    # -----------------------------------------
+        
+                    # Handle NaN / invalid values
+                    if value != value:  # NaN check
                         value = None
                     else:
                         precision = self.register_map[key].get("precision", 2)
                         value = round(value, precision)
-
+        
                     new_data[key] = value
-
+        
             return new_data
 
         except ConnectionException as err:
