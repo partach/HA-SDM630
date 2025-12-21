@@ -4,16 +4,24 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from .const import DOMAIN
 from .coordinator import HA_SDM630Coordinator
+from homeassistant.helpers.entity import DeviceInfo
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_entities):
     coordinator: HA_SDM630Coordinator = hass.data[DOMAIN][entry.entry_id]
-
+    device_info = DeviceInfo{
+        "identifiers": {(DOMAIN, entry.entry_id)},
+        "name": entry.title or "SDM630",
+        "manufacturer": "Eastron",
+        "model": "SDM630",
+        "configuration_url": f"homeassistant://config/integrations/integration/{entry.entry_id}",
+    }
     # The coordinator already knows which registers to create
     entities = [
         HA_SDM630Sensor(coordinator, entry, key, info)
         for key, info in coordinator.register_map.items()
     ]
-
+    for entity in entities:
+            entity._attr_device_info = device_info
     async_add_entities(entities)
 
 
