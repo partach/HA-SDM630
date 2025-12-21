@@ -83,9 +83,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     dev_reg.async_get_or_create(
         config_entry_id=entry.entry_id,
         identifiers={(DOMAIN, entry.unique_id or hub_key)},
-        name=entry.title or "SDM-630",
+        name=entry.title or "SDM630",
         manufacturer="Eastron",
-        model=model,
+        model="SDM630",
     )
     entry.async_on_unload(entry.add_update_listener(update_listener))
 
