@@ -97,28 +97,30 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     if not unload_ok:
         return False
 
-    coordinator = hass.data[DOMAIN].pop(entry.entry_id)
-    hub_key = coordinator.hub_key
+    # Remove coordinator
+    coordinator = hass.data[DOMAIN].pop(entry.entry_id, None)
+    if not coordinator:
+        return True  # Already cleaned up
+
+    hub_key = getattr(coordinator, "hub_key", None)
+    if not hub_key:
+        return True
 
     # Check if any other active entries still use this hub
-    remaining = [
-        e
+    hub_still_used = any(
+        getattr(hass.data[DOMAIN].get(e.entry_id), "hub_key", None) == hub_key
         for e in hass.config_entries.async_entries(DOMAIN)
         if e.entry_id != entry.entry_id
-    ]
-    
-    # Check if the hub is still used by other entries
-    hub_still_used = False
-    for other_entry in remaining:
-        other_coordinator = hass.data[DOMAIN].get(other_entry.entry_id)
-        if other_coordinator and getattr(other_coordinator, "hub_key", None) == hub_key:
-            hub_still_used = True
-            break
+    )
 
     if not hub_still_used:
         hub = hass.data[DOMAIN]["hubs"].pop(hub_key, None)
         if hub:
-            await hub.close()
+            try:
+                await hub.close()
+                _LOGGER.debug("Closed shared hub %s during unload", hub_key)
+            except Exception as err:
+                _LOGGER.warning("Error closing hub %s: %s", hub_key, err)
 
     return True
 
@@ -161,8 +163,15 @@ class SDM630SerialHub:
             if self.client.connected:
                 try:
                     await self.client.close()
+                    _LOGGER.debug("Successfully closed SDM630 connection")
                 except Exception as err:
-                    _LOGGER.exception("Unexpected error closing SDM630 connection for serial: %s", err)
+                    _LOGGER.exception("Unexpected error closing SDM630 connection: %s", err)
+            else:
+                _LOGGER.debug("SDM630 client was already disconnected")
+            # Always nil out the client to prevent reuse
+            self.client = None
+        else:
+            _LOGGER.debug("SDM630 client was already None - nothing to close")
 
 
 class SDM630TcpHub:
